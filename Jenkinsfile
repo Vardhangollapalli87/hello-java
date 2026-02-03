@@ -1,28 +1,77 @@
+// pipeline {
+//     agent any
+
+//     stages {
+
+//         stage('Checkout Code') {
+//             steps {
+//                 echo 'Code checked out from Git'
+//             }
+//         }
+
+//         stage('Compile Java') {
+//             steps {
+//                 sh '''
+//                     rm -rf build
+//                     mkdir build
+//                     javac -d build src/Hello.java
+//                 '''
+//             }
+//         }
+
+//         stage('Create Executable JAR') {
+//             steps {
+//                 sh '''
+//                     jar cfe hello.jar Hello -C build .
+//                 '''
+//             }
+//         }
+//     }
+
+//     post {
+//         success {
+//             archiveArtifacts artifacts: '*.jar'
+//         }
+//     }
+// }
+
 pipeline {
     agent any
+
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                echo 'Code checked out from Git'
+                echo 'Code already checked out from Git'
             }
         }
 
-        stage('Compile Java') {
+    stage('Compile Java') {
+        steps {
+            sh '''
+                rm -rf build
+                mkdir build
+                javac -d build src/Hello.java
+                jar cfe hello.jar Hello -C build .
+            '''
+        }
+    }
+
+
+        stage('Prepare Package Directory') {
             steps {
                 sh '''
-                    rm -rf build
-                    mkdir build
-                    javac -d build src/Hello.java
+                    mkdir -p package/usr/local/bin
+                    cp hello.jar package/usr/local/bin/
                 '''
             }
         }
 
-        stage('Create Executable JAR') {
+        stage('Build DEB using FPM') {
             steps {
                 sh '''
-                    jar cfe hello.jar Hello -C build .
+                    fpm -s dir -t deb -n hello-java -v 1.0.${BUILD_NUMBER} --prefix=/ -C package
                 '''
             }
         }
@@ -30,7 +79,7 @@ pipeline {
 
     post {
         success {
-            archiveArtifacts artifacts: '*.jar'
+            archiveArtifacts artifacts: '*.deb'
         }
     }
 }
