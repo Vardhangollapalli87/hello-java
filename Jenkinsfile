@@ -91,12 +91,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                echo 'Code already checked out from Git'
-            }
-        }
-
         stage('Compile Java') {
             steps {
                 bat '''
@@ -122,7 +116,8 @@ pipeline {
         stage('Build DEB using FPM') {
             steps {
                 bat '''
-                fpm -s dir -t deb -n hello-java ^
+                fpm -s dir -t deb ^
+                 -n hello-java ^
                  -v 1.0.%BUILD_NUMBER% ^
                  --architecture all ^
                  -C package
@@ -137,4 +132,5 @@ pipeline {
         }
     }
 }
+
 
