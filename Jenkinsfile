@@ -26,7 +26,14 @@ pipeline {
                 '''
             }
         }
+        stage('Check Environment') {
+            steps {
+                sh 'echo $SHELL'
+                sh 'uname -a'
+            }
+        }
     }
+    
 
     post {
         success {
